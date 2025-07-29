@@ -4,6 +4,9 @@ import random
 class Result:
 
     def __init__(self, initial_b, final_b, result, f, p, b, wager, payout, day):
+        '''
+        Should make this a pandas dataframe for real data analysis
+        '''
         self.initial_b = initial_b
         self.final_b = final_b
         self.result = result
@@ -31,8 +34,18 @@ class KellyBasic:
         for i in range(start, end):
             print(self._results[i])
 
-    def get_brankroll(self):
+    def get_results(self):
+        return self._results
+
+    def get_bankroll(self):
         return self._bankroll
+
+    def get_bankline(self):
+        bankline = []
+        for r in self._results:
+            bankline.append(r.final_b)
+
+        return bankline
 
     def simulate_days(self, days, p_expected=0.7, b_mean=0.7):
         for d in range(days):
