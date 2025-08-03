@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from datetime import datetime
 from argparse import ArgumentParser
 from kelly import KellyBasic, KellyAdaptive
 
@@ -19,6 +20,7 @@ def scatter_obswin_avgbank(kellys, outfile):
     y = np.array(yd)
 
     plt.scatter(x,y)
+    plt.title(f'Average Bankroll Per Observed Win Probability')
     plt.xlabel('Observed Win Probability')
     plt.ylabel('Average Bankroll')
     plt.savefig(outfile)
@@ -27,30 +29,45 @@ def scatter_obswin_avgbank(kellys, outfile):
 
 # ['Day', 'Starting Bank', 'Ending Bank', 'Result', 'Wager', 'Payout', 'f', 'b', 'p']
 def line_average_days(kellys, days, outfile):
-    day_averages = []
-
-    for d in range(days):
-        day_sum = 0
+    days = range(days)
+    day_avgs = []
+    day_std = []
+    for d in days:
+        dayline = []
         for k in kellys:
-            day = k.get_results()['Ending Bank'][d]
-            day_sum += day
+            rs = k.get_results()['Ending Bank'][d]
+            dayline.append(rs)
 
-        day_avg = day_sum / len(kellys)
-        day_averages.append(day_avg)
+        dayline_np = np.array(dayline)
+        day_avgs.append(dayline_np.mean())
+        day_std.append(dayline_np.std())
 
-    x = [d for d in range(days)]
-    y = day_averages
+    x = np.array(days)
+    y = np.array(day_avgs)
+    ys = np.array(day_std)
     plt.plot(x,y)
+    #plt.fill_between(x, y-ys, y+ys, color='lightblue', alpha=0.4)
     plt.xlabel('Day')
     plt.ylabel('Average Day Bankroll')
     plt.savefig(outfile)
     plt.clf()
 
+# ['Day', 'Starting Bank', 'Ending Bank', 'Result', 'Wager', 'Payout', 'f', 'b', 'p']
+def print_average_kellys(kellys):
+    with open('out/results.txt', 'w') as file:
+        for k in kellys:
+            fs = k.get_results()['f']
+            mean = np.array(fs).mean()
+            print(mean)
+            file.write(mean)
+
+def get_timestamp():
+    return datetime.now().isoformat()
 
 
 if __name__ == '__main__':
 
-    print("Kelly Computations")
+    print("Kelly Betting Strategies")
 
     parser = ArgumentParser()
 
@@ -78,11 +95,12 @@ if __name__ == '__main__':
         #print(ka.get_results())
 
     # scatterplots of win p vs ending bankroll
-    scatter_obswin_avgbank(statics, 'out/scatter_obswin_avgbank_statics.png')
-    scatter_obswin_avgbank(adaptives, 'out/scatter_obswin_avgbank_adaptives.png')
+    scatter_obswin_avgbank(statics, f'out/{get_timestamp()}_scatter_obswin_avgbank_staticP_p={args.win_probability}_N={args.monte}_B={args.bankroll}_Days={args.days}.png')
+    scatter_obswin_avgbank(adaptives, f'out/{get_timestamp()}_scatter_obswin_avgbank_adaptiveP_p={args.win_probability}_N={args.monte}_B={args.bankroll}_Days={args.days}.png')
 
     # line plots of average bankroll by day
-    line_average_days(statics, args.days, 'out/line_avgdays_statics.png')
-    line_average_days(adaptives, args.days, 'out/line_avgdays_adaptives.png')
+    line_average_days(statics, args.days, f'out/{get_timestamp()}_line_avgdays_staticP_p={args.win_probability}_N={args.monte}_B={args.bankroll}_Days={args.days}.png.png')
+    line_average_days(adaptives, args.days, f'out/{get_timestamp()}_line_avgdays_adaptiveP_p={args.win_probability}_N={args.monte}_B={args.bankroll}_Days={args.days}.png.png')
 
-
+    print_average_kellys(statics)
+    print_average_kellys(adaptives)

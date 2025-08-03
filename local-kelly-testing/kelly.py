@@ -1,6 +1,11 @@
 import random
 import pandas as pd
 
+from argparse import ArgumentParser
+
+def get_kelly(p, b):
+    return p - (1-p)/b
+
 class KellyBasic:
 
     def __init__(self, bankroll=20):
@@ -24,7 +29,7 @@ class KellyBasic:
             p = self._update_p(p_expected)
 
             # get Kelly factor
-            f = self._get_kelly(p, b)
+            f = get_kelly(p, b)
 
             # calculate wager
             wager, payout = self._calculate_wager(f, b)
@@ -48,9 +53,6 @@ class KellyBasic:
 
     def _update_p(self, p):
         return p
-
-    def _get_kelly(self, p, b):
-        return p - (1-p)/b
 
     def _calculate_wager(self, f, b):
         wager = f * self._bankroll
@@ -103,4 +105,13 @@ class KellyAdaptive(KellyBasic):
         else:
             return self._wins / self._games
 
+if __name__ == '__main__':
 
+    parser = ArgumentParser()
+
+    parser.add_argument('-b', '--odds', type=float, default=.7, help='Payout (e.g. If a bet gives 2 to 1 odds b=2.0. If a bet gives 1.78 to one b=0.78. If a bet gives -111 b=100/111=0.9009.')
+    parser.add_argument('-p', '--win_probability', type=float, default=0.7, help='Probability of winning a particular bet.')
+
+    args = parser.parse_args()
+
+    print(f'f=${get_kelly(p, b)}')
