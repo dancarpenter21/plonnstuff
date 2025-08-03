@@ -54,12 +54,17 @@ def line_average_days(kellys, days, outfile):
 
 # ['Day', 'Starting Bank', 'Ending Bank', 'Result', 'Wager', 'Payout', 'f', 'b', 'p']
 def print_average_kellys(kellys):
-    with open('out/results.txt', 'w') as file:
+    with open('out/results.txt', 'a') as file:
+        file.write(f'====== {get_timestamp()} =======')
+        file.write('\n')
         for k in kellys:
             fs = k.get_results()['f']
             mean = np.array(fs).mean()
             print(mean)
-            file.write(mean)
+            file.write(str(mean))
+            file.write('\n')
+
+        file.flush()
 
 def get_timestamp():
     return datetime.now().isoformat()
